@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, useOutletContext } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Flag, Building2, X
+  Plus, ChevronRight, ChevronDown, Pencil, Trash2, Flag, Building2, X, UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +82,7 @@ export function ProjectWBS() {
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]);
   const [propagateAssignments, setPropagateAssignments] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
 
   const { data: tasksResponse, isLoading } = useQuery({
     queryKey: ['tasks', projectId],
@@ -100,7 +101,6 @@ export function ProjectWBS() {
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
       const result = await tasksApi.create(data);
-      // After creating, assign companies
       if (selectedAssignments.length > 0 && result.data.id) {
         await tasksApi.bulkAssign(result.data.id, selectedAssignments, false);
       }
@@ -116,7 +116,6 @@ export function ProjectWBS() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       await tasksApi.update(id, data);
-      // Update assignments
       await tasksApi.bulkAssign(id, selectedAssignments, propagateAssignments);
       return { id };
     },
@@ -140,13 +139,13 @@ export function ProjectWBS() {
     setParentTaskId(null);
     setSelectedAssignments([]);
     setPropagateAssignments(false);
+    setShowTeamDropdown(false);
   };
 
   const openNewTaskDialog = (parentId: string | null = null) => {
     resetForm();
     setParentTaskId(parentId);
     
-    // Se è un subtask, eredita le assegnazioni dal parent
     if (parentId) {
       const parentTask = findTaskById(parentId, buildTaskTree(tasksResponse?.data || []));
       if (parentTask?.assignments) {
@@ -196,13 +195,22 @@ export function ProjectWBS() {
     }
   };
 
-  const toggleAssignment = (companyId: string) => {
-    setSelectedAssignments(prev => 
-      prev.includes(companyId) 
-        ? prev.filter(id => id !== companyId)
-        : [...prev, companyId]
-    );
+  const addAssignment = (companyId: string) => {
+    if (!selectedAssignments.includes(companyId)) {
+      setSelectedAssignments([...selectedAssignments, companyId]);
+    }
+    setShowTeamDropdown(false);
   };
+
+  const removeAssignment = (companyId: string) => {
+    setSelectedAssignments(selectedAssignments.filter(id => id !== companyId));
+  };
+
+  const getTeamMemberInfo = (companyId: string) => {
+    return team.find((m: any) => m.company_id === companyId);
+  };
+
+  const availableTeamMembers = team.filter((m: any) => !selectedAssignments.includes(m.company_id));
 
   const findTaskById = (id: string, tasks: Task[]): Task | null => {
     for (const task of tasks) {
@@ -290,7 +298,6 @@ export function ProjectWBS() {
           }`}
           style={{ paddingLeft: `${level * 24 + 12}px` }}
         >
-          {/* Expand + WBS */}
           <div className="col-span-1 flex items-center gap-1">
             {hasChildren ? (
               <button onClick={() => toggleExpand(task.id!)} className="p-0.5 hover:bg-gray-200 rounded">
@@ -300,16 +307,14 @@ export function ProjectWBS() {
             <span className="text-xs text-gray-500">{task.wbs_code}</span>
           </div>
 
-          {/* Name */}
           <div className="col-span-3 flex items-center gap-2">
             <span className="truncate">{task.name}</span>
             {task.is_milestone && <Flag className="h-3 w-3 text-purple-500" />}
           </div>
 
-          {/* Assigned To - Multiple */}
           <div className="col-span-2 flex items-center gap-1 flex-wrap">
             {assignments.length > 0 ? (
-              assignments.map((a, i) => (
+              assignments.map((a) => (
                 <span key={a.company_id} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">
                   <Building2 className="h-2.5 w-2.5" />
                   {a.company_name.split(' ')[0]}
@@ -320,28 +325,23 @@ export function ProjectWBS() {
             )}
           </div>
 
-          {/* Status */}
           <div className="col-span-1">
             <span className={`px-2 py-0.5 rounded-full text-xs ${statusInfo.color}`}>
               {statusInfo.label}
             </span>
           </div>
 
-          {/* Priority */}
           <div className="col-span-1">
             <span className={`text-xs ${priorityInfo.color}`}>{priorityInfo.label}</span>
           </div>
 
-          {/* Dates */}
           <div className="col-span-1 text-xs text-gray-500">{formatDate(task.planned_start_date)}</div>
           <div className="col-span-1 text-xs text-gray-500">{formatDate(task.planned_end_date)}</div>
 
-          {/* Hours */}
           <div className="col-span-1 text-xs text-gray-500">
             {Number(task.actual_hours || 0).toFixed(1)}/{Number(task.estimated_hours || 0).toFixed(0)}h
           </div>
 
-          {/* Actions */}
           <div className="col-span-1 flex items-center gap-1 justify-end">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openNewTaskDialog(task.id!)}>
               <Plus className="h-3 w-3" />
@@ -366,7 +366,7 @@ export function ProjectWBS() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Work Breakdown Structure</h2>
+        <h2 className="text-2xl font-bold">Work Breakdown Structure </h2>
         <Button onClick={() => openNewTaskDialog(null)}>
           <Plus className="h-4 w-4 mr-2" />
           Nuovo Task
@@ -423,37 +423,78 @@ export function ProjectWBS() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2} />
               </div>
 
-              {/* Assegnazioni Multiple */}
+              {/* Assegnazioni - Nuovo Design */}
               <div className="space-y-2">
-                <Label>Assegnato a (Team) - Seleziona multipli</Label>
-                {team.length === 0 ? (
-                  <p className="text-xs text-gray-500 p-2 bg-gray-50 rounded">
-                    Nessun membro nel team. Vai alla sezione Team per aggiungerne.
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
-                    {team.map((m: any) => {
-                      const isSelected = selectedAssignments.includes(m.company_id);
+                <Label>Assegnato a (Team)</Label>
+                
+                {/* Membri selezionati come chip */}
+                <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border rounded-lg bg-gray-50">
+                  {selectedAssignments.length === 0 ? (
+                    <span className="text-sm text-gray-400 italic">Nessun membro assegnato</span>
+                  ) : (
+                    selectedAssignments.map(companyId => {
+                      const member = getTeamMemberInfo(companyId);
                       return (
+                        <span 
+                          key={companyId}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm"
+                        >
+                          <Building2 className="h-3.5 w-3.5" />
+                          {member?.company_name || 'Sconosciuto'}
+                          {member?.role && <span className="text-xs opacity-70">({member.role})</span>}
+                          <button
+                            type="button"
+                            onClick={() => removeAssignment(companyId)}
+                            className="ml-1 p-0.5 hover:bg-blue-200 rounded-full transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Dropdown per aggiungere */}
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTeamDropdown(!showTeamDropdown)}
+                    disabled={availableTeamMembers.length === 0}
+                    className="w-full justify-start"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    {availableTeamMembers.length === 0 
+                      ? 'Tutti i membri sono già assegnati' 
+                      : 'Aggiungi membro del team...'}
+                  </Button>
+                  
+                  {showTeamDropdown && availableTeamMembers.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {availableTeamMembers.map((m: any) => (
                         <button
                           key={m.company_id}
                           type="button"
-                          onClick={() => toggleAssignment(m.company_id)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
-                            isSelected 
-                              ? 'bg-blue-500 text-white' 
-                              : 'bg-white border border-gray-300 text-gray-700 hover:border-blue-500'
-                          }`}
+                          onClick={() => addAssignment(m.company_id)}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
                         >
-                          <Building2 className="h-3.5 w-3.5" />
-                          {m.company_name}
-                          {m.role && <span className="text-xs opacity-75">({m.role})</span>}
-                          {isSelected && <X className="h-3 w-3 ml-1" />}
+                          <Building2 className="h-4 w-4 text-gray-400" />
+                          <span>{m.company_name}</span>
+                          {m.role && <span className="text-xs text-gray-500">({m.role})</span>}
                         </button>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {team.length === 0 && (
+                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                    ⚠️ Nessun membro nel team del progetto. Vai alla sezione Team per aggiungerne.
+                  </p>
                 )}
+
                 {editingTask && editingTask.children && editingTask.children.length > 0 && (
                   <label className="flex items-center gap-2 mt-2 text-sm">
                     <input
@@ -545,3 +586,4 @@ export function ProjectWBS() {
     </div>
   );
 }
+// Build Wed Dec 31 14:19:14 CET 2025

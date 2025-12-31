@@ -185,7 +185,7 @@ export function ProjectTeam() {
               <div className="flex items-center gap-3">
                 <Clock className="h-8 w-8 text-orange-500" />
                 <div>
-                  <p className="text-2xl font-bold">{totalActualHours.toFixed(1)}h</p>
+                  <p className="text-2xl font-bold">{(totalActualHours || 0).toFixed(1)}h</p>
                   <p className="text-sm text-gray-500">Ore Lavorate</p>
                 </div>
               </div>
@@ -282,7 +282,7 @@ export function ProjectTeam() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4 text-blue-500" />
-                        {member.total_actual_hours.toFixed(1)}h
+                        {(member.total_actual_hours || 0).toFixed(1)}h
                       </span>
                     </div>
                     <div className="flex items-center gap-1">

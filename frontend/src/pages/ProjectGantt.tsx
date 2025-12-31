@@ -1,36 +1,61 @@
 import { useState, useMemo } from 'react';
-import { useParams, useOutletContext } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { api } from '@/api/client';
 
 const tasksApi = {
   list: (projectId: string) => api.get(`/tasks/by-project/${projectId}`),
+  update: (id: string, data: any) => api.put(`/tasks/${id}`, data),
 };
 
 interface Task {
   id: string;
   wbs_code?: string;
   name: string;
+  description?: string;
   planned_start_date?: string;
   planned_end_date?: string;
   progress_percentage?: number;
   status: string;
+  priority?: string;
   parent_task_id?: string | null;
   is_milestone?: boolean;
+  estimated_hours?: number;
   level?: number;
+  children?: Task[];
 }
 
 type ZoomLevel = 'day' | 'week' | 'month';
 
+const statusOptions = [
+  { value: 'todo', label: 'Da fare' },
+  { value: 'in_progress', label: 'In corso' },
+  { value: 'review', label: 'In revisione' },
+  { value: 'completed', label: 'Completato' },
+  { value: 'cancelled', label: 'Annullato' },
+];
+
+const priorityOptions = [
+  { value: 'low', label: 'Bassa' },
+  { value: 'medium', label: 'Media' },
+  { value: 'high', label: 'Alta' },
+  { value: 'urgent', label: 'Urgente' },
+];
+
 export function ProjectGantt() {
   const { projectId } = useParams<{ projectId: string }>();
-  const context = useOutletContext<{ project: any }>();
+  const queryClient = useQueryClient();
   
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [viewOffset, setViewOffset] = useState(0);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [formData, setFormData] = useState<Partial<Task>>({});
 
   const { data: tasksResponse, isLoading } = useQuery({
     queryKey: ['tasks', projectId],
@@ -38,7 +63,41 @@ export function ProjectGantt() {
     enabled: !!projectId,
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => tasksApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      setEditingTask(null);
+    },
+  });
+
   const tasks: Task[] = tasksResponse?.data || [];
+
+  const openEditDialog = (task: Task) => {
+    setEditingTask(task);
+    setFormData({
+      name: task.name,
+      description: task.description || '',
+      status: task.status,
+      priority: task.priority || 'medium',
+      planned_start_date: task.planned_start_date || '',
+      planned_end_date: task.planned_end_date || '',
+      estimated_hours: task.estimated_hours || 0,
+      progress_percentage: task.progress_percentage || 0,
+    });
+  };
+
+  const handleSave = () => {
+    if (!editingTask) return;
+    updateMutation.mutate({
+      id: editingTask.id,
+      data: {
+        ...formData,
+        estimated_hours: formData.estimated_hours || 0,
+        progress_percentage: formData.progress_percentage || 0,
+      }
+    });
+  };
 
   // Calculate date range
   const { dateRange } = useMemo(() => {
@@ -79,7 +138,6 @@ export function ProjectGantt() {
         current.setMonth(current.getMonth() + 1);
       }
     }
-
     return { dateRange: dates };
   }, [tasks, zoomLevel]);
 
@@ -105,6 +163,7 @@ export function ProjectGantt() {
 
     const flatList: (Task & { level: number })[] = [];
     const flatten = (items: (Task & { children: Task[]; level: number })[]) => {
+      items.sort((a, b) => (a.wbs_code || '').localeCompare(b.wbs_code || '', undefined, { numeric: true }));
       items.forEach(item => {
         flatList.push(item);
         if (item.children.length) flatten(item.children as any);
@@ -160,13 +219,31 @@ export function ProjectGantt() {
     return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'in_progress': return 'bg-blue-500';
-      case 'review': return 'bg-yellow-500';
-      case 'cancelled': return 'bg-red-500';
-      default: return 'bg-gray-400';
+  const getBarColors = (task: Task) => {
+    const progress = task.progress_percentage || 0;
+    
+    if (task.is_milestone) {
+      return { bg: 'bg-purple-500', fill: 'bg-purple-700' };
+    }
+    
+    if (task.status === 'completed' || progress === 100) {
+      return { bg: 'bg-emerald-200', fill: 'bg-emerald-500' };
+    }
+    
+    if (task.status === 'cancelled') {
+      return { bg: 'bg-red-200', fill: 'bg-red-400' };
+    }
+
+    if (progress === 0) {
+      return { bg: 'bg-slate-200', fill: 'bg-slate-400' };
+    } else if (progress < 25) {
+      return { bg: 'bg-rose-200', fill: 'bg-rose-500' };
+    } else if (progress < 50) {
+      return { bg: 'bg-orange-200', fill: 'bg-orange-500' };
+    } else if (progress < 75) {
+      return { bg: 'bg-amber-200', fill: 'bg-amber-500' };
+    } else {
+      return { bg: 'bg-lime-200', fill: 'bg-lime-500' };
     }
   };
 
@@ -198,6 +275,18 @@ export function ProjectGantt() {
         </div>
       </div>
 
+      {/* Legenda */}
+      <div className="flex items-center gap-4 mb-4 text-xs">
+        <span className="text-gray-500">Progresso:</span>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-slate-400"></div> 0%</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-rose-500"></div> &lt;25%</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-orange-500"></div> 25-50%</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-amber-500"></div> 50-75%</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-lime-500"></div> 75-99%</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-500"></div> 100%</div>
+        <span className="text-gray-400 ml-4">💡 Clicca su una barra per modificare</span>
+      </div>
+
       <Card>
         <CardContent className="p-0 overflow-x-auto">
           {taskTree.length === 0 ? (
@@ -206,8 +295,9 @@ export function ProjectGantt() {
             </div>
           ) : (
             <div className="min-w-max">
+              {/* Header */}
               <div className="flex border-b bg-gray-50">
-                <div className="w-64 flex-shrink-0 px-3 py-2 font-medium border-r">Task</div>
+                <div className="w-72 flex-shrink-0 px-3 py-2 font-medium border-r">Task</div>
                 <div className="flex-1 flex">
                   {displayDates.map((date, idx) => (
                     <div key={idx} className="flex-1 px-2 py-2 text-xs text-center border-r text-gray-600" style={{ minWidth: `${cellWidth}px` }}>
@@ -217,30 +307,72 @@ export function ProjectGantt() {
                 </div>
               </div>
 
+              {/* Tasks */}
               {taskTree.map((task) => {
                 const position = getTaskPosition(task);
+                const progress = task.progress_percentage || 0;
+                const colors = getBarColors(task);
+                const hasChildren = (task as any).children?.length > 0;
+
                 return (
-                  <div key={task.id} className="flex border-b hover:bg-gray-50">
-                    <div className="w-64 flex-shrink-0 px-3 py-2 border-r truncate" style={{ paddingLeft: `${12 + (task.level || 0) * 16}px` }}>
+                  <div key={task.id} className={`flex border-b hover:bg-gray-50 ${hasChildren ? 'bg-gray-50/50' : ''}`}>
+                    {/* Task name - clickable */}
+                    <div 
+                      className="w-72 flex-shrink-0 px-3 py-2 border-r truncate cursor-pointer hover:bg-blue-50 transition-colors" 
+                      style={{ paddingLeft: `${12 + (task.level || 0) * 16}px` }}
+                      onClick={() => openEditDialog(task)}
+                    >
                       <div className="flex items-center gap-2">
                         {task.is_milestone && <Flag className="h-3 w-3 text-purple-500" />}
-                        <span className={`text-sm ${task.is_milestone ? 'font-semibold text-purple-700' : ''}`}>{task.name}</span>
+                        <span className={`text-sm ${task.is_milestone ? 'font-semibold text-purple-700' : ''} ${hasChildren ? 'font-medium' : ''} hover:text-blue-600`}>
+                          {task.name}
+                        </span>
                       </div>
                     </div>
+
+                    {/* Gantt bar area */}
                     <div className="flex-1 relative h-10">
+                      {/* Grid lines */}
                       <div className="absolute inset-0 flex">
                         {displayDates.map((_, idx) => (
                           <div key={idx} className="flex-1 border-r border-gray-100" style={{ minWidth: `${cellWidth}px` }} />
                         ))}
                       </div>
+
+                      {/* Task bar - clickable */}
                       {position && (
                         <div 
-                          className={`absolute top-2 h-6 rounded ${task.is_milestone ? 'bg-purple-500' : getStatusColor(task.status)}`}
-                          style={{ left: position.left, width: task.is_milestone ? '8px' : position.width, minWidth: task.is_milestone ? '8px' : '4px' }}
-                          title={`${task.name}\n${task.progress_percentage || 0}%`}
+                          className={`absolute top-2 h-6 rounded shadow-sm overflow-hidden ${colors.bg} cursor-pointer hover:ring-2 hover:ring-blue-400 hover:ring-offset-1 transition-all`}
+                          style={{ 
+                            left: position.left, 
+                            width: task.is_milestone ? '12px' : position.width, 
+                            minWidth: task.is_milestone ? '12px' : '24px' 
+                          }}
+                          onClick={() => openEditDialog(task)}
+                          title={`${task.name}\nProgresso: ${progress}%\nStato: ${task.status}\n\nClicca per modificare`}
                         >
-                          {!task.is_milestone && (task.progress_percentage || 0) > 0 && (
-                            <div className="absolute inset-y-0 left-0 bg-white/30 rounded-l" style={{ width: `${task.progress_percentage}%` }} />
+                          {/* Progress fill */}
+                          {!task.is_milestone && progress > 0 && (
+                            <div 
+                              className={`absolute inset-y-0 left-0 ${colors.fill} transition-all`}
+                              style={{ width: `${progress}%` }}
+                            />
+                          )}
+                          
+                          {/* Percentage text */}
+                          {!task.is_milestone && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-[10px] font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">
+                                {progress}%
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Milestone diamond */}
+                          {task.is_milestone && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-2 h-2 bg-white transform rotate-45"></div>
+                            </div>
                           )}
                         </div>
                       )}
@@ -253,12 +385,126 @@ export function ProjectGantt() {
         </CardContent>
       </Card>
 
-      <div className="mt-4 flex gap-6 text-sm text-gray-600">
-        <div className="flex items-center gap-2"><div className="w-4 h-3 bg-gray-400 rounded" /><span>Da fare</span></div>
-        <div className="flex items-center gap-2"><div className="w-4 h-3 bg-blue-500 rounded" /><span>In corso</span></div>
-        <div className="flex items-center gap-2"><div className="w-4 h-3 bg-green-500 rounded" /><span>Completato</span></div>
-        <div className="flex items-center gap-2"><Flag className="h-4 w-4 text-purple-500" /><span>Milestone</span></div>
-      </div>
+      {/* Edit Dialog */}
+      <Dialog open={!!editingTask} onOpenChange={(open) => !open && setEditingTask(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              Modifica Task
+              {editingTask?.wbs_code && <span className="text-gray-400 ml-2">({editingTask.wbs_code})</span>}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input 
+                value={formData.name || ''} 
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Stato</Label>
+                <select 
+                  value={formData.status || 'todo'}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                >
+                  {statusOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priorità</Label>
+                <select 
+                  value={formData.priority || 'medium'}
+                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                >
+                  {priorityOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data Inizio</Label>
+                <Input 
+                  type="date"
+                  value={formData.planned_start_date || ''} 
+                  onChange={(e) => setFormData({ ...formData, planned_start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Data Fine</Label>
+                <Input 
+                  type="date"
+                  value={formData.planned_end_date || ''} 
+                  onChange={(e) => setFormData({ ...formData, planned_end_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ore Stimate</Label>
+                <Input 
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={formData.estimated_hours || ''} 
+                  onChange={(e) => setFormData({ ...formData, estimated_hours: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Progresso (%)</Label>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.progress_percentage || 0} 
+                    onChange={(e) => setFormData({ ...formData, progress_percentage: parseInt(e.target.value) || 0 })}
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-gray-500">%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress slider */}
+            <div className="space-y-2">
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={formData.progress_percentage || 0}
+                onChange={(e) => setFormData({ ...formData, progress_percentage: parseInt(e.target.value) })}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>0%</span>
+                <span>25%</span>
+                <span>50%</span>
+                <span>75%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingTask(null)}>Annulla</Button>
+            <Button onClick={handleSave} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? 'Salvataggio...' : 'Salva'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
