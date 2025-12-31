@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Noscite CRM + Project Management
 
 Sistema unificato per la gestione clienti, opportunità commerciali e project management.
@@ -53,3 +54,6 @@ docker-compose up -d
 ## 📝 License
 
 Proprietary - Noscite S.r.l.
+=======
+# Noscite_ecosystem
+>>>>>>> 7d88d3725e852bb3d905e88c4599ebb9e62da048
