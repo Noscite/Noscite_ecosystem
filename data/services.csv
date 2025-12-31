@@ -1,0 +1,24 @@
+id,user_id,code,name,description,service_type,unit_price,unit_of_measure,is_active,created_at,updated_at,partner_id
+3c64155a-8a3a-4178-aea4-e526577021ab,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,SEM-FRM-004,"AI DEMYSTIFIED - Etica, Bias e Responsabilità Digitale",Corso di formazione su AI per scuole superiori,simple,480.00,pz,true,2025-09-19 07:25:35.803231+00,2025-09-19 07:59:22.834305+00,123ad15f-9756-4463-8463-7a58b3546333
+5a8772bd-0b92-436b-a05c-26dcb7f037fa,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,SEM-FRM-003,Communitas,"Il corso **Communitas – Collaborazione Intelligente** fornisce strumenti pratici per:  
+- migliorare la comunicazione interna ed esterna dei team;  
+- gestire progetti e attività con trasparenza e chiarezza;  
+- utilizzare **Obsidian come collaboration hub** per progetti, riunioni e task;  
+- integrare strumenti esterni (Teams, Slack, calendari) solo dove indispensabile;  
+- sviluppare un *Playbook Collaborativo* che garantisca governance e continuità operativa.  ",simple,2400.00,pz,true,2025-09-19 07:22:45.557087+00,2025-09-19 07:59:28.937306+00,123ad15f-9756-4463-8463-7a58b3546333
+542989b5-b8ca-41f6-8b43-5fadd7455d8b,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,SEM-FRM-001,Initium,Corso di formazione AI,simple,2000.00,pz,true,2025-09-19 07:20:57.021267+00,2025-09-19 07:59:48.758263+00,123ad15f-9756-4463-8463-7a58b3546333
+86571dd1-d8b5-400e-8337-d6227c4f6261,a2bd548b-bdd1-421f-bdc6-40603a75f96d,WEB-E015-HOST,Hosting website E015,null,simple,300.00,pz,true,2025-10-08 20:41:23.562076+00,2025-10-08 20:41:23.562076+00,null
+a734ee17-cbff-4130-8e89-b02639f3ab2f,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,SEM-FRM-002,Structura,"Il corso Structura – Second Brain Aziendale guida i partecipanti nell’implementazione di un sistema di knowledge management scalabile basato su Obsidian e sulla metodologia CODE (Capture, Organize, Distill, Express).  ",simple,2400.00,pz,true,2025-09-19 07:22:12.602342+00,2025-09-19 08:00:18.985073+00,123ad15f-9756-4463-8463-7a58b3546333
+6fd52d7d-c434-4075-9ca3-688c1a77192a,a2bd548b-bdd1-421f-bdc6-40603a75f96d,SAAS-E015-TEN,Piattaforma E015 - tenant setup,"Piattaforma per il caricamento di :
+- EVENTI
+- PUNTI DI INTERESSE
+- ITINERARI
+- OFFERTE COMMERCIALI
+e generazione di API in modalità multiTENANT",simple,3000.00,pz,true,2025-09-20 16:10:12.823191+00,2025-09-20 16:13:39.83071+00,null
+e7de6fe3-124a-4628-bf25-b4ea3b9a81b0,a2bd548b-bdd1-421f-bdc6-40603a75f96d,WEB-E015-UNPLI,Website Pro loco Adda martesana,null,simple,13300.00,pz,true,2025-09-20 16:19:08.672307+00,2025-09-20 16:19:08.672307+00,null
+b3311228-81ba-4c47-8ba1-09d0eb9ae80e,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,KIT-FRM-001,Formazione Scuola Superiore AI e Second Brain,Formazione Scuola Superiore AI e Second Brain,composed,1000.00,pz,true,2025-09-19 07:48:50.619424+00,2025-09-23 06:09:24.348549+00,null
+b81174a1-d65e-4fa2-8593-993a996e4ab1,a2bd548b-bdd1-421f-bdc6-40603a75f96d,SAAS-E015-HOST,Hosting piattaforma E015,null,simple,300.00,pz,true,2025-10-08 20:40:42.670054+00,2025-10-08 20:52:13.072418+00,c5a44af6-5208-4403-976b-0bce036a47c4
+1d859707-3c48-403c-ae75-9cb5223ac52a,a2bd548b-bdd1-421f-bdc6-40603a75f96d,SAAS-E015-USR,Piattaforma E015 - User setup,null,simple,300.00,pz,true,2025-09-20 16:14:22.462317+00,2025-10-08 20:52:49.030558+00,c5a44af6-5208-4403-976b-0bce036a47c4
+c3ad44db-ea51-4251-9250-21edf959a7a6,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,KIT-FRM-TRA,Transforma - Percorso Formativo Business,null,composed,6500.00,pz,true,2025-09-23 06:28:02.226022+00,2025-09-23 07:45:37.793947+00,null
+e947d925-edaf-46b1-a93f-10c60e96d493,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,CONS-001,Consulenza,servizio di cosulenza,simple,150.00,pz,true,2025-12-02 10:01:43.465207+00,2025-12-02 10:01:43.465207+00,123ad15f-9756-4463-8463-7a58b3546333
+87d89daf-7361-4c30-9f43-be8ff8e09ca5,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,SEM-FRM-005,SECOND BRAIN - Organizzare Conoscenza nell'Era AI con Obsidian,corso Obsidian per le scuole superiori,simple,600.00,pz,true,2025-09-19 07:27:08.781465+00,2025-12-13 18:05:19.852209+00,null

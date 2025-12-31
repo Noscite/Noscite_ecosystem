@@ -1,0 +1,10 @@
+id,user_id,company_id,first_name,last_name,email,phone,mobile,position,department,notes,is_primary,is_active,created_at,updated_at
+560c8078-484f-47a2-94cb-aa952b3a24ee,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,123ad15f-9756-4463-8463-7a58b3546333,Stefano,Andrello,stefano.andrello@gmail.com,+393476859801,+393476859801,null,null,nessuna nota,true,true,2025-09-22 12:10:55.74594+00,2025-09-22 12:10:55.74594+00
+10da371e-c9a2-4089-baf5-46fd5e8a1b96,a2bd548b-bdd1-421f-bdc6-40603a75f96d,44f1c2be-2193-40d5-ab26-ff5662a2c622,Pietro,Segalini,null,null,null,Presidente,null,null,false,true,2025-09-22 13:32:32.654036+00,2025-09-22 13:32:32.654036+00
+649e00e0-af6b-4d3f-8dcb-53662100e7cb,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,null,Corrado,Facchini,facchini.corrado@gmail.com,3498603096,null,Cto,null,"LEAD FIERA - inridia comolake - Azienda: Knobs
+
+Contatto per Sella Lab (Stefano Azzalin)",false,true,2025-10-14 10:38:28.191759+00,2025-10-14 10:38:28.191759+00
+3858f525-3898-47df-b656-81f179c481d9,00000000-0000-0000-0000-000000000001,38ba219a-0839-4e35-b977-06f3766e7abc,Stefano,Fasiani,stefano.fasiani@res-it.com,null,+393429982033,Business Development Manager,null,null,false,true,2025-10-14 17:06:25.959864+00,2025-10-14 17:06:25.959864+00
+8988d399-f3a1-421c-b6e6-9719b913f785,00000000-0000-0000-0000-000000000001,f766673c-12ff-48bf-ac63-090adc037224,Nicola,Camurri,nicola.camurri@grupposcai.it,null,3346871849,Strategy Director,null,null,false,true,2025-10-15 09:10:48.804008+00,2025-10-15 09:10:48.804008+00
+7ef8038d-2263-42f8-a730-1e763c647a20,00000000-0000-0000-0000-000000000001,1bf5fd28-accd-49c9-bab3-2c57d28f24ba,Alice,Melpignano,alice.melpignano@neosvoc.com,null,+393478683810,CEO and Co-Founder,null,null,false,true,2025-10-15 09:31:03.177333+00,2025-10-15 09:31:03.177333+00
+34d96780-5c77-4f25-96b3-7fed2f9fe3eb,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,null,Marco,Liu,elisirlabs@hotmail.com,35192821983,null,null,null,LEAD FIERA - inridia comolake,false,true,2025-10-15 13:46:13.611049+00,2025-10-15 13:46:13.611049+00

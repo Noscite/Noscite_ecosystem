@@ -1,0 +1,173 @@
+# PROGETTO: NOSCITE CRM - Sistema di Gestione Aziendale Integrato
+
+## 1. EXECUTIVE SUMMARY
+
+Il progetto prevede lo sviluppo di un sistema CRM (Customer Relationship Management) completo per Noscite, una società di consulenza IT. Il sistema integrerà la gestione delle relazioni con i clienti, il project management avanzato, il tracking delle ore lavorate e un modulo di intelligenza artificiale per l'analisi automatica dei documenti di progetto.
+
+Budget stimato: €25.000
+Durata prevista: 6 mesi (180 giorni)
+Team di sviluppo: 2-3 persone
+
+## 2. OBIETTIVI DEL PROGETTO
+
+### 2.1 Obiettivi Primari
+- Centralizzare la gestione di aziende, contatti e opportunità commerciali
+- Automatizzare il flusso dalle opportunità agli ordini e ai progetti
+- Implementare un sistema di project management con WBS, Gantt e milestone
+- Tracciare le ore lavorate sui progetti (timesheet)
+- Integrare l'AI per l'analisi documentale e la generazione automatica di WBS
+
+### 2.2 Obiettivi Secondari
+- Integrazione con Microsoft Azure AD per l'autenticazione SSO
+- Integrazione con OneDrive per la gestione documentale
+- Dashboard analitiche per il management
+- Reportistica avanzata per la fatturazione
+
+## 3. SCOPE OF WORK
+
+### 3.1 Modulo CRM Base
+- Gestione anagrafica aziende con classificazione (cliente, prospect, partner, fornitore)
+- Gestione contatti associati alle aziende
+- Gestione opportunità commerciali con pipeline di vendita
+- Conversione automatica opportunità → ordine
+
+### 3.2 Modulo Servizi e Listino
+- Catalogo servizi con prezzi orari e forfettari
+- Servizi semplici e servizi composti (KIT)
+- Gestione sconti e condizioni speciali
+
+### 3.3 Modulo Ordini e Commesse
+- Creazione ordini da opportunità acquisite
+- Associazione servizi a ordini con quantità e prezzi
+- Generazione automatica codice commessa
+- Tracking stato ordine (bozza, confermato, in lavorazione, completato)
+
+### 3.4 Modulo Project Management
+- Creazione progetti da ordini
+- Work Breakdown Structure (WBS) gerarchica multilivello
+- Diagramma di Gantt interattivo
+- Gestione milestone con tipologie (deliverable, pagamento, review)
+- Assegnazione risorse ai task
+- Dipendenze tra attività
+
+### 3.5 Modulo Timesheet
+- Registrazione ore lavorate per progetto/task
+- Tipologie di attività (sviluppo, analisi, design, testing, meeting, etc.)
+- Workflow di approvazione (draft, submitted, approved, rejected)
+- Calcolo automatico costi basato su tariffe orarie
+
+### 3.6 Modulo AI Assistant
+- Upload e analisi documenti di progetto (PDF, DOCX, TXT)
+- Generazione automatica WBS da specifiche di progetto
+- Chat RAG per interrogare i documenti di progetto
+- Identificazione automatica rischi e milestone
+- Suggerimento metodologia (Waterfall, Agile, Hybrid)
+
+### 3.7 Integrazioni
+- Microsoft Azure AD per autenticazione SSO
+- Microsoft OneDrive per storage documenti
+- Creazione automatica cartelle progetto su OneDrive
+
+## 4. ARCHITETTURA TECNICA
+
+### 4.1 Stack Tecnologico
+- Frontend: React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui
+- Backend: FastAPI (Python) + SQLAlchemy + Pydantic
+- Database: PostgreSQL 16 con estensione pgvector per embeddings AI
+- AI: Claude API (Anthropic) + OpenAI Embeddings
+- Infrastruttura: VPS Linux, Docker, Nginx, SSL Let's Encrypt
+
+### 4.2 Sicurezza
+- Autenticazione OAuth 2.0 tramite Azure AD
+- JWT tokens per sessioni API
+- HTTPS obbligatorio
+- Row Level Security su database (RLS)
+- Ruoli utente: Admin (accesso completo), User (accesso limitato)
+
+## 5. DELIVERABLES
+
+1. Applicazione web frontend responsive
+2. API REST backend documentata (OpenAPI/Swagger)
+3. Database PostgreSQL con schema completo
+4. Documentazione tecnica e utente
+5. Ambiente di produzione configurato e deployato
+6. Modulo AI funzionante e testato
+
+## 6. MILESTONE DI PROGETTO
+
+### M1 - Setup Infrastruttura (Giorno 15)
+- VPS configurato con Docker
+- Database PostgreSQL installato
+- Nginx configurato con SSL
+- Pipeline CI/CD base
+
+### M2 - Modulo CRM Base (Giorno 45)
+- CRUD aziende, contatti, servizi
+- Gestione opportunità
+- Autenticazione Azure AD funzionante
+- Prima release testabile
+
+### M3 - Modulo Ordini (Giorno 70)
+- Conversione opportunità → ordini
+- Gestione servizi su ordine
+- Calcolo automatico totali
+
+### M4 - Project Management (Giorno 110)
+- Creazione progetti da ordini
+- WBS gerarchica completa
+- Gantt chart funzionante
+- Gestione milestone
+
+### M5 - Timesheet e Reporting (Giorno 140)
+- Modulo timesheet completo
+- Dashboard statistiche
+- Report ore per progetto
+
+### M6 - AI Module e Go-Live (Giorno 180)
+- Upload e analisi documenti
+- Generazione WBS automatica
+- Chat RAG funzionante
+- Go-live produzione
+- Pagamento finale: €10.000
+
+## 7. RISCHI IDENTIFICATI
+
+### R1 - Complessità Integrazione Azure AD
+- Probabilità: Media
+- Impatto: Alto
+- Mitigazione: Dedicare sprint iniziale all'integrazione auth
+
+### R2 - Performance AI su documenti grandi
+- Probabilità: Media  
+- Impatto: Medio
+- Mitigazione: Implementare chunking e limiti di dimensione
+
+### R3 - Curva apprendimento team su pgvector
+- Probabilità: Bassa
+- Impatto: Basso
+- Mitigazione: Formazione anticipata e documentazione
+
+### R4 - Requisiti non chiari per modulo AI
+- Probabilità: Alta
+- Impatto: Medio
+- Mitigazione: Prototipo rapido e feedback iterativo
+
+## 8. TEAM E RESPONSABILITÀ
+
+- Project Manager / Tech Lead: Coordinamento, architettura, code review
+- Full Stack Developer: Sviluppo frontend e backend
+- DevOps: Infrastruttura, deployment, monitoring
+
+## 9. CONDIZIONI COMMERCIALI
+
+- Valore totale progetto: €25.000
+- Pagamento M1 (anticipo): €5.000
+- Pagamento M4 (intermedio): €10.000  
+- Pagamento M6 (saldo finale): €10.000
+
+## 10. PIANO DI COMUNICAZIONE
+
+- Stand-up settimanale con cliente
+- Demo ogni milestone
+- Canale Slack dedicato per comunicazioni rapide
+- Repository Git condiviso per tracciamento codice

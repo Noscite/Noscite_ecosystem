@@ -1,0 +1,2 @@
+id,order_id,user_id,name,description,status,start_date,end_date,planned_start_date,planned_end_date,budget,actual_cost,planned_value,earned_value,progress_percentage,created_at,updated_at
+508a0b55-c42a-48e2-be55-7a49b76fa033,8d485031-fe15-47b0-a64d-8cced7c1ce14,189b43fd-9975-488b-8ba4-14ef5f0d1d6c,Sviluppo sito web Adda martesana,null,planning,null,null,2025-10-08,2025-12-30,13300,0,0,0,0,2025-12-05 20:35:23.348432+00,2025-12-05 20:35:23.348432+00
